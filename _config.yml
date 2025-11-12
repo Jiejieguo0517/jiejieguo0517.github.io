@@ -162,6 +162,7 @@ include:
   - .htaccess
   - _pages
   - files
+  - TPA-Codec
 exclude:
   - "*.sublime-project"
   - "*.sublime-workspace"
