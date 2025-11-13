@@ -608,7 +608,7 @@
             return bitrate < 1 ? `${(bitrate*1000).toFixed(0)} bps` : `${bitrate} kbps`;
         }
 
-        // Function to get filename for a method's audio - 仅用于音频文件
+        // Function to get filename for a method's audio
         function getAudioFilename(baseName, codec, bitrate) {
             // 特殊处理DAC和TPA-Codec的文件名
             if (filenameBitrateMap[codec] && filenameBitrateMap[codec][bitrate]) {
@@ -616,12 +616,6 @@
             }
             // 其他编码器使用原始比特率
             return `${baseName}-${bitrate}kbps.wav`;
-        }
-
-        // Function to get text filename - 文本文件使用原始比特率
-        function getTextFilename(baseName, codec, bitrate) {
-            // 文本文件总是使用原始比特率
-            return `${baseName}-${bitrate}kbps.txt`;
         }
 
         // Function to get CSV column name for a method
@@ -932,18 +926,21 @@
                 await loadDatasetAudios(dataset.id, dataset.audioFiles);
             }
 
-            // Add event listeners to navigation buttons
-            document.querySelectorAll('.dataset-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    switchDataset(button.dataset.dataset);
-                });
+            // 修复1: 使用事件委托绑定导航按钮事件
+            document.querySelector('.dataset-navigation').addEventListener('click', function(e) {
+                if (e.target.classList.contains('dataset-button')) {
+                    switchDataset(e.target.dataset.dataset);
+                }
             });
         }
 
         // Initialize the page when loaded
         document.addEventListener('DOMContentLoaded', function() {
-            generateResultsPage();
-            initLightbox();
+            // 修复2: 确保所有元素加载完成后再初始化
+            setTimeout(() => {
+                generateResultsPage();
+                initLightbox();
+            }, 100);
         });
     </script>
 </body>
