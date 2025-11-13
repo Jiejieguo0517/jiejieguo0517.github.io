@@ -572,6 +572,13 @@
             }
         ];
 
+        // 跟踪数据集加载状态
+        const datasetLoadedState = {
+            'LibriSpeech-test-clean': false,
+            'LibriSpeech-test-other': false,
+            'VCTK': false
+        };
+
         // Lightbox 功能
         function initLightbox() {
             const lightbox = document.getElementById('lightbox');
@@ -851,8 +858,12 @@
 
             section.innerHTML = `
                 <div class="dataset-title">${dataset.name}</div>
+                <div class="loading-indicator" id="loading-${dataset.id}">
+                    <div class="loading-spinner"></div>
+                    <p>Loading ${dataset.name} content...</p>
+                </div>
                 <div id="${dataset.id}-content">
-                    <p>Loading audio samples for ${dataset.name}...</p>
+                    <p>Click to load audio samples for ${dataset.name}...</p>
                 </div>
             `;
 
@@ -862,6 +873,10 @@
         // Function to load audio files for a dataset
         async function loadDatasetAudios(datasetId, audioFiles) {
             const contentDiv = document.getElementById(`${datasetId}-content`);
+            const loadingIndicator = document.getElementById(`loading-${datasetId}`);
+
+            // 显示加载指示器
+            loadingIndicator.classList.add('active');
             contentDiv.innerHTML = '';
 
             // Load CSV data for this dataset
@@ -898,10 +913,22 @@
                 // Load WER values
                 await loadWERValues(datasetId, audioName, csvData);
             }
+
+            // 隐藏加载指示器
+            loadingIndicator.classList.remove('active');
         }
 
         // Function to switch dataset
-        function switchDataset(datasetId) {
+        async function switchDataset(datasetId) {
+            // 如果数据集尚未加载，则加载它
+            if (!datasetLoadedState[datasetId]) {
+                const dataset = datasets.find(d => d.id === datasetId);
+                if (dataset) {
+                    await loadDatasetAudios(dataset.id, dataset.audioFiles);
+                    datasetLoadedState[datasetId] = true;
+                }
+            }
+
             // Update navigation buttons
             document.querySelectorAll('.dataset-button').forEach(button => {
                 button.classList.toggle('active', button.dataset.dataset === datasetId);
@@ -921,12 +948,14 @@
             for (const dataset of datasets) {
                 const datasetSection = createDatasetSection(dataset);
                 container.appendChild(datasetSection);
-
-                // Load audio files for this dataset
-                await loadDatasetAudios(dataset.id, dataset.audioFiles);
             }
 
-            // 修复1: 使用事件委托绑定导航按钮事件
+            // 只加载第一个数据集
+            const firstDataset = datasets[0];
+            await loadDatasetAudios(firstDataset.id, firstDataset.audioFiles);
+            datasetLoadedState[firstDataset.id] = true;
+
+            // 使用事件委托绑定导航按钮事件
             document.querySelector('.dataset-navigation').addEventListener('click', function(e) {
                 if (e.target.classList.contains('dataset-button')) {
                     switchDataset(e.target.dataset.dataset);
@@ -936,11 +965,8 @@
 
         // Initialize the page when loaded
         document.addEventListener('DOMContentLoaded', function() {
-            // 修复2: 确保所有元素加载完成后再初始化
-            setTimeout(() => {
-                generateResultsPage();
-                initLightbox();
-            }, 100);
+            generateResultsPage();
+            initLightbox();
         });
     </script>
 </body>
