@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPA-Codec: Intelligibility-Fidelity Scalable Neural Speech Coding</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.4;
+            color: #333;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+            background-color: #f5f5f5;
+            font-size: 13px;
+        }
+
+        /* 第一部分：论文介绍 */
+        .paper-intro {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .authors {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+            font-size: 14px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .abstract {
+            background: linear-gradient(to right, #f8f9fa, #f0f3f5);
+            padding: 18px 20px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+            font-size: 13.5px;
+            line-height: 1.5;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .keywords {
+            color: #666;
+            font-size: 12.5px;
+            padding: 8px 0;
+            font-style: italic;
+        }
+
+        .architecture-figure {
+            text-align: center;
+            margin: 25px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .architecture-figure img {
+            max-width: 50%; /* 缩小到50% */
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .architecture-figure img:hover {
+            transform: scale(1.02);
+        }
+
+        /* 第二部分：实验部分 */
+        .experiment-section {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .comparison-description {
+            background: #f0f7ff;
+            padding: 18px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 13.5px;
+            line-height: 1.5;
+            border: 1px solid #d1e7ff;
+        }
+
+        .comparison-description a {
+            color: #2980b9;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .comparison-description a:hover {
+            text-decoration: underline;
+            color: #1a5276;
+        }
+
+        .dataset-navigation {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .dataset-button {
+            flex: 1;
+            padding: 16px 0;
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+            text-align: center;
+            border-right: 1px solid #e0e0e0;
+            font-weight: 500;
+        }
+
+        .dataset-button:last-child {
+            border-right: none;
+        }
+
+        .dataset-button:hover {
+            background: #e9ecef;
+        }
+
+        .dataset-button.active {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        .dataset-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .dataset-section.active {
+            display: block;
+        }
+
+        .dataset-title {
+            background: linear-gradient(to right, #2c3e50, #34495e);
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .audio-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .ground-truth {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .method-group {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .method-item {
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            min-height: 180px;
+            justify-content: space-between;
+            border: 1px solid #f0f0f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .method-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+        }
+
+        .method-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 6px;
+            text-align: center;
+            font-size: 11px;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            padding: 4px;
+        }
+
+        .method-title.ours {
+            background: #e8f4fd;
+            border-left: 3px solid #3498db;
+            padding: 6px;
+        }
+
+        audio {
+            width: 100%;
+            margin: 6px 0;
+            height: 30px;
+        }
+
+        .recognized-text {
+            font-size: 10px;
+            color: #555;
+            background: #f8f9fa;
+            padding: 6px;
+            border-radius: 4px;
+            margin-top: 6px;
+            flex-grow: 1;
+            min-height: 40px;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: auto;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+
+        .recognized-text:hover {
+            background: #e9ecef;
+        }
+
+        /* 新增WER样式 */
+        .wer-value {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 2px;
+            text-align: center;
+            margin-top: 4px;
+            font-family: monospace;
+        }
+
+        .wer-zero {
+            color: #000;
+        }
+
+        .wer-non-zero {
+            color: #8B0000; /* 深红色 */
+        }
+
+        .mel-spectrogram {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .mel-spectrogram:hover {
+            transform: scale(1.03);
+        }
+
+        .original-text {
+            background: #e8f5e8;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: 11.5px;
+            text-align: center;
+            border: 1px solid #d4edda;
+        }
+
+        .group-title {
+            font-weight: bold;
+            margin: 15px 0 8px 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 6px;
+            font-size: 13px;
+            grid-column: 1 / -1;
+        }
+
+        .baselines-group {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* Lightbox 样式 */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        @media (max-width: 1200px) {
+            .method-group, .baselines-group {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .method-group, .baselines-group {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .audio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .method-group, .baselines-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dataset-navigation {
+                flex-direction: column;
+            }
+
+            .dataset-button {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .dataset-button:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 第一部分：论文介绍 -->
+    <div class="paper-intro">
+        <h1>TPA-Codec: A Novel Architecture for Intelligibility-Fidelity Scalable Neural Speech Coding</h1>
+
+        <div class="authors">
+            Jiejie Guo, Wenjun Xu, Senior Member, IEEE, Fengyu Wang, Member, IEEE,
+            Junxiao Liang, JiJie Liu, Jiaqi Wang
+        </div>
+
+        <div class="abstract">
+            <strong>Abstract:</strong> Prevailing neural speech codecs rely on frame-level feature extraction and quantization,
+            failing to effectively exploit the key structural properties of speech signals—the time-invariant timbre
+            characteristics and the discrete phonemic unit structure. To address this challenge, we propose Timbre-Phoneme-Acoustic
+            Codec (TPA-Codec), a novel neural speech codec based on a semantic-guided hierarchical disentanglement framework,
+            which decomposes speech into a three-level representation: a timbre layer modeling slow-varying timbre characteristics,
+            a phoneme layer capturing core linguistic units, and an acoustic layer reconstructing high-frequency residual details.
+            Meanwhile, TPA-Codec develops a phoneme-level dynamic semantic compression mechanism, which incorporates phoneme boundaries
+            as structural priors into the architecture to dynamically aggregate frame-level representations into phoneme-level representations,
+            thereby drastically reducing the token rate. Consequently, TPA-Codec achieves intelligible reconstruction at 97.05 bps,
+            which approaches the theoretical limit for speech coding. Enabled by its hierarchical architecture, the method further
+            supports high-fidelity reconstruction at up to 6.108 kbps, realizing intelligibility-fidelity scalable coding.
+        </div>
+
+        <div class="keywords">
+            <strong>Keywords:</strong> Speech coding, disentangled representation learning, ultra-low bitrate, vector quantization.
+        </div>
+
+        <div class="architecture-figure">
+            <h3>Figure 1: TPA-Codec Architecture</h3>
+            <img src="figs_15files/fig1.png" alt="TPA-Codec Architecture Diagram" class="zoomable">
+        </div>
+    </div>
+
+    <!-- 第二部分：实验部分 -->
+    <div class="experiment-section">
+        <h2 class="section-title">Experimental Results</h2>
+
+        <!-- Comparison Description -->
+        <div class="comparison-description">
+            <p>We compare the proposed method with state-of-the-art speech codecs from three categories. For <strong>traditional codecs</strong>, we employ MELPe evaluated at 0.6, 1.2, and 2.4 kbps operating at 8 kHz sampling rate, and Opus evaluated at 4 and 6 kbps operating at 16 kHz sampling rate. For <strong>multi-rate neural codecs</strong>, we include DAC tested across 0.5 to 6 kbps (<a href="https://github.com/descriptinc/descript-audio-codec" target="_blank">GitHub</a>), WavTokenizer evaluated at 0.5 and 0.9 kbps (<a href="https://github.com/jishengpeng/WavTokenizer" target="_blank">GitHub</a>), and EnCodec evaluated at 1.5, 3, and 6 kbps (<a href="https://github.com/facebookresearch/encodec" target="_blank">GitHub</a>). For <strong>single-rate neural codecs</strong>, we implement HIFI-Codec at 2 kbps (<a href="https://github.com/yangdongchao/AcademiCodec" target="_blank">GitHub</a>) and LLM-Codec at 0.85 kbps (<a href="https://github.com/yangdongchao/LLM-Codec" target="_blank">GitHub</a>).</p>
+            <p>We select a subset of audio samples from each dataset, presenting the original audio alongside reconstructions from various methods. Below each reconstructed audio, we display the recognized text obtained using the hubert-large-ls960-ft ASR model (<a href="https://huggingface.co/facebook/hubert-large-ls960-ft" target="_blank">HuggingFace</a>).</p>
+        </div>
+
+        <!-- Dataset Navigation -->
+        <div class="dataset-navigation">
+            <button class="dataset-button active" data-dataset="LibriSpeech-test-clean">LibriSpeech Test Clean</button>
+            <button class="dataset-button" data-dataset="LibriSpeech-test-other">LibriSpeech Test Other</button>
+            <button class="dataset-button" data-dataset="VCTK">VCTK</button>
+        </div>
+    </div>
+
+    <!-- Results Sections -->
+    <div id="results-container">
+        <!-- Results will be loaded here by JavaScript -->
+    </div>
+
+       <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" id="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Zoomed Image">
+    </div>
+
+<script>
+        // 配置 - 添加文件名映射
+        const codecBitrateMap = {
+            'Opus': [4, 6],
+            'MELPe': [0.6, 1.2, 2.4],
+            'Encodec': [1.5, 3, 6],
+            'HIFI-Codec': [2],
+            'LLM-Codec': [0.85],
+            'WavTokenizer': [0.5, 0.9],
+            'DAC': [0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0],
+            'TPA-Codec': [0.097, 0.108, 0.608, 1.108, 1.608, 2.108, 2.608, 3.108, 3.608, 4.108, 4.608, 5.108, 5.608, 6.108]
+        };
+
+        // 文件名映射 - 解决DAC和TPA-Codec的文件名问题
+        const filenameBitrateMap = {
+            'DAC': {
+                0.5: '0.5',
+                1.0: '1.0',
+                1.5: '1.5',
+                2.0: '2.0',
+                2.5: '2.5',
+                3.0: '3.0',
+                3.5: '3.5',
+                4.0: '4.0',
+                4.5: '4.5',
+                5.0: '5.0',
+                5.5: '5.5',
+                6.0: '6.0'
+            },
+            'TPA-Codec': {
+                0.097: '0.054',
+                0.108: '0.065',
+                0.608: '0.565',
+                1.108: '1.065',
+                1.608: '1.565',
+                2.108: '2.065',
+                2.608: '2.565',
+                3.108: '3.065',
+                3.608: '3.565',
+                4.108: '4.065',
+                4.608: '4.565',
+                5.108: '5.065',
+                5.608: '5.565',
+                6.108: '6.065'
+            }
+        };
+
+        // TPA-Codec比特率显示映射
+        const tpaBitrateDisplayMap = {
+            'LibriSpeech-test-clean': [97.83, 109.84, 609.84, 1109.84, 1609.84, 2109.84, 2609.84, 3109.84, 3609.84, 4109.84, 4609.84, 5109.84, 5609.84, 6109.84],
+            'LibriSpeech-test-other': [94.56, 107.38, 607.38, 1107.38, 1607.38, 2107.38, 2607.38, 3107.38, 3607.38, 4107.38, 4607.38, 5107.38, 5607.38, 6107.38],
+            'VCTK': [84.38, 108.19, 608.19, 1108.19, 1608.19, 2108.19, 2608.19, 3108.19, 3608.19, 4108.19, 4608.19, 5108.19, 5608.19, 6108.19]
+        };
+
+        const datasets = [
+            {
+                id: 'LibriSpeech-test-clean',
+                name: 'LibriSpeech Test Clean',
+                audioFiles: [
+                    '237-134500-0008',
+                    '1580-141084-0036',
+                    '6829-68771-0022',
+                    '4446-2273-0002',
+                    '4077-13754-0000'
+                ]
+            },
+            {
+                id: 'LibriSpeech-test-other',
+                name: 'LibriSpeech Test Other',
+                audioFiles: [
+                    '3005-163390-0003',
+                    '3528-168669-0025',
+                    '8131-117017-0004',
+                    '8131-117016-0017',
+                    '3005-163390-0006'
+                ]
+            },
+            {
+                id: 'VCTK',
+                name: 'VCTK',
+                audioFiles: [
+                    'p347_406',
+                    'p336_204',
+                    'p361_175',
+                    'p245_063',
+                    'p308_296'
+                ]
+            }
+        ];
+
+        // Lightbox 功能
+        function initLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxClose = document.getElementById('lightbox-close');
+
+            // 点击图片打开lightbox
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('zoomable')) {
+                    lightboxImg.src = e.target.src;
+                    lightbox.classList.add('active');
+                }
+            });
+
+            // 关闭lightbox
+            lightboxClose.addEventListener('click', function() {
+                lightbox.classList.remove('active');
+            });
+
+            lightbox.addEventListener('click', function(e) {
+                if (e.target !== lightboxImg) {
+                    lightbox.classList.remove('active');
+                }
+            });
+        }
+
+        // Function to format bitrate for display
+        function formatBitrate(bitrate, codec, dataset) {
+            if (codec === 'TPA-Codec') {
+                const index = codecBitrateMap[codec].indexOf(bitrate);
+                const displayRate = tpaBitrateDisplayMap[dataset][index];
+                return displayRate < 1000 ? `${displayRate.toFixed(2)} bps` : `${(displayRate/1000).toFixed(3)} kbps`;
+            }
+            return bitrate < 1 ? `${(bitrate*1000).toFixed(0)} bps` : `${bitrate} kbps`;
+        }
+
+        // Function to get filename for a method's audio - 仅用于音频文件
+        function getAudioFilename(baseName, codec, bitrate) {
+            // 特殊处理DAC和TPA-Codec的文件名
+            if (filenameBitrateMap[codec] && filenameBitrateMap[codec][bitrate]) {
+                return `${baseName}-${filenameBitrateMap[codec][bitrate]}kbps.wav`;
+            }
+            // 其他编码器使用原始比特率
+            return `${baseName}-${bitrate}kbps.wav`;
+        }
+
+        // Function to get text filename - 文本文件使用原始比特率
+        function getTextFilename(baseName, codec, bitrate) {
+            // 文本文件总是使用原始比特率
+            return `${baseName}-${bitrate}kbps.txt`;
+        }
+
+        // Function to get CSV column name for a method
+        function getCSVColumnName(codec, bitrate) {
+            return `${codec} @${bitrate.toFixed(3)}kbps`;
+        }
+
+        // Function to format WER value
+        function formatWER(werValue) {
+            if (werValue === 0) {
+                return "WER: 0.0";
+            } else if (werValue < 0.0001) {
+                return "WER: 0.0";
+            } else {
+                return `WER: ${werValue.toFixed(4)}`;
+            }
+        }
+
+        // Function to get WER class
+        function getWERClass(werValue) {
+            if (werValue === 0) {
+                return "wer-zero";
+            } else {
+                return "wer-non-zero";
+            }
+        }
+
+        // Function to normalize codec name for element IDs
+        function normalizeCodecName(codec) {
+            return codec.toLowerCase().replace(/-/g, '').replace(/ /g, '');
+        }
+
+        // Function to create method group HTML
+        function createMethodGroup(methods, dataset, audioBaseName) {
+            let html = '';
+
+            // Group 1: Baselines (all codecs except TPA-Codec)
+            const baselineCodecs = ['Opus', 'MELPe', 'Encodec', 'HIFI-Codec', 'LLM-Codec', 'WavTokenizer', 'DAC'];
+            html += `<div class="group-title">Baselines</div><div class="baselines-group">`;
+
+            baselineCodecs.forEach(codec => {
+                if (methods.includes(codec)) {
+                    codecBitrateMap[codec].forEach(bitrate => {
+                        const displayBitrate = formatBitrate(bitrate, codec, dataset);
+                        const audioFilename = getAudioFilename(audioBaseName, codec, bitrate);
+                        const audioFile = `audios_15files/${dataset}/${codec}/wavs_recon/${audioFilename}`;
+                        const textFile = `texts_15files/${dataset}/${audioBaseName}/${codec} @${bitrate.toFixed(3)}kbps.txt`;
+                        const normalizedCodec = normalizeCodecName(codec);
+
+                        html += `
+                            <div class="method-item">
+                                <div class="method-title">
+                                    ${codec} @${displayBitrate}
+                                </div>
+                                <audio controls preload="none">
+                                    <source src="${audioFile}" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-${dataset}-${audioBaseName}-${normalizedCodec}-${bitrate}">
+                                    Loading...
+                                </div>
+                                <div class="wer-value" id="wer-${dataset}-${audioBaseName}-${normalizedCodec}-${bitrate}">
+                                    WER: --
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+            html += `</div>`;
+
+            // Group 2: TPA-Codec
+            if (methods.includes('TPA-Codec')) {
+                html += `<div class="group-title">TPA-Codec (Ours)</div><div class="method-group">`;
+                codecBitrateMap['TPA-Codec'].forEach((bitrate, index) => {
+                    const displayBitrate = formatBitrate(bitrate, 'TPA-Codec', dataset);
+                    const audioFilename = getAudioFilename(audioBaseName, 'TPA-Codec', bitrate);
+                    const audioFile = `audios_15files/${dataset}/TPA-Codec/wavs_recon/${audioFilename}`;
+                    const textFile = `texts_15files/${dataset}/${audioBaseName}/TPA-Codec @${bitrate.toFixed(3)}kbps.txt`;
+                    const normalizedCodec = normalizeCodecName('TPA-Codec');
+
+                    html += `
+                        <div class="method-item">
+                            <div class="method-title ours">TPA-Codec (ours) @${displayBitrate}</div>
+                            <audio controls preload="none">
+                                <source src="${audioFile}" type="audio/wav">
+                                Your browser does not support the audio element.
+                            </audio>
+                            <div class="recognized-text" id="text-${dataset}-${audioBaseName}-${normalizedCodec}-${bitrate}">
+                                Loading...
+                            </div>
+                            <div class="wer-value" id="wer-${dataset}-${audioBaseName}-${normalizedCodec}-${bitrate}">
+                                WER: --
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            return html;
+        }
+
+        // Function to load text files
+        async function loadTextFile(filePath) {
+            try {
+                const response = await fetch(filePath);
+
+                if (response.ok) {
+                    const text = await response.text();
+                    return text;
+                } else {
+                    return `Text not available (${response.status})`;
+                }
+            } catch (error) {
+                return `Error loading text: ${error.message}`;
+            }
+        }
+
+        // Function to load CSV file and parse it
+        async function loadCSVFile(datasetId) {
+            try {
+                const response = await fetch(`texts_15files/${datasetId}/Scores.csv`);
+
+                if (!response.ok) {
+                    console.error(`Failed to load CSV for ${datasetId}: ${response.status}`);
+                    return null;
+                }
+
+                const csvText = await response.text();
+
+                // 清理文本：移除回车符和换行符
+                const cleanedText = csvText.replace(/\r/g, '').trim();
+                const lines = cleanedText.split('\n');
+
+                if (lines.length < 2) {
+                    console.error(`CSV file for ${datasetId} is empty or invalid`);
+                    return null;
+                }
+
+                // Parse header - 清理每个头部
+                const headers = lines[0].split(',').map(header => header.trim());
+
+                // Parse data
+                const data = {};
+
+                for (let i = 1; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    if (line === '') continue;
+
+                    const values = line.split(',').map(value => value.trim());
+                    if (values.length < 2) continue;
+
+                    const audioName = values[0];
+                    data[audioName] = {};
+
+                    for (let j = 1; j < headers.length && j < values.length; j++) {
+                        const werValue = parseFloat(values[j]);
+                        data[audioName][headers[j]] = isNaN(werValue) ? null : werValue;
+                    }
+                }
+
+                return data;
+            } catch (error) {
+                console.error(`Error loading CSV for ${datasetId}:`, error);
+                return null;
+            }
+        }
+
+        // Function to load all text content for an audio
+        async function loadTextContent(dataset, audioBaseName) {
+            // Load original text
+            const originalTextPath = `texts_15files/${dataset}/${audioBaseName}/raw_text.txt`;
+            const originalText = await loadTextFile(originalTextPath);
+            const originalTextElement = document.getElementById(`original-text-${dataset}-${audioBaseName}`);
+
+            if (originalTextElement) {
+                originalTextElement.textContent = originalText;
+            }
+
+            // Load recognized texts for each method
+            for (const codec of Object.keys(codecBitrateMap)) {
+                for (const bitrate of codecBitrateMap[codec]) {
+                    // 文本文件使用原始比特率
+                    const textPath = `texts_15files/${dataset}/${audioBaseName}/${codec} @${bitrate.toFixed(3)}kbps.txt`;
+                    const text = await loadTextFile(textPath);
+                    const normalizedCodec = normalizeCodecName(codec);
+                    const elementId = `text-${dataset}-${audioBaseName}-${normalizedCodec}-${bitrate}`;
+                    const element = document.getElementById(elementId);
+
+                    if (element) {
+                        element.textContent = text;
+                    }
+                }
+            }
+        }
+
+        // Function to load WER values for an audio
+        async function loadWERValues(dataset, audioBaseName, csvData) {
+            if (!csvData || !csvData[audioBaseName]) {
+                console.warn(`No WER data found for ${dataset}/${audioBaseName}`);
+                return;
+            }
+
+            const audioData = csvData[audioBaseName];
+
+            for (const codec of Object.keys(codecBitrateMap)) {
+                for (const bitrate of codecBitrateMap[codec]) {
+                    const columnName = getCSVColumnName(codec, bitrate);
+                    const werValue = audioData[columnName];
+
+                    if (werValue !== undefined && werValue !== null) {
+                        const normalizedCodec = normalizeCodecName(codec);
+                        const elementId = `wer-${dataset}-${audioBaseName}-${normalizedCodec}-${bitrate}`;
+                        const element = document.getElementById(elementId);
+
+                        if (element) {
+                            element.textContent = formatWER(werValue);
+                            element.className = `wer-value ${getWERClass(werValue)}`;
+                        }
+                    } else {
+                        console.warn(`No WER value found for ${columnName} in ${dataset}/${audioBaseName}`);
+                    }
+                }
+            }
+        }
+
+        // Function to create dataset section
+        function createDatasetSection(dataset) {
+            const section = document.createElement('div');
+            section.className = `dataset-section ${dataset.id === 'LibriSpeech-test-clean' ? 'active' : ''}`;
+            section.id = `section-${dataset.id}`;
+
+            section.innerHTML = `
+                <div class="dataset-title">${dataset.name}</div>
+                <div id="${dataset.id}-content">
+                    <p>Loading audio samples for ${dataset.name}...</p>
+                </div>
+            `;
+
+            return section;
+        }
+
+        // Function to load audio files for a dataset
+        async function loadDatasetAudios(datasetId, audioFiles) {
+            const contentDiv = document.getElementById(`${datasetId}-content`);
+            contentDiv.innerHTML = '';
+
+            // Load CSV data for this dataset
+            const csvData = await loadCSVFile(datasetId);
+
+            for (const audioName of audioFiles) {
+                const audioGrid = document.createElement('div');
+                audioGrid.className = 'audio-grid';
+
+                audioGrid.innerHTML = `
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_15files/${datasetId}/${audioName}/a_original_mel_with_f0_energy_phonemes.png"
+                             alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls preload="none">
+                            <source src="audios_15files/${datasetId}/raw_audios_16k/${audioName}.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-${datasetId}-${audioName}">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        ${createMethodGroup(Object.keys(codecBitrateMap), datasetId, audioName)}
+                    </div>
+                `;
+
+                contentDiv.appendChild(audioGrid);
+
+                // Load text content
+                await loadTextContent(datasetId, audioName);
+
+                // Load WER values
+                await loadWERValues(datasetId, audioName, csvData);
+            }
+        }
+
+        // Function to switch dataset
+        function switchDataset(datasetId) {
+            // Update navigation buttons
+            document.querySelectorAll('.dataset-button').forEach(button => {
+                button.classList.toggle('active', button.dataset.dataset === datasetId);
+            });
+
+            // Update dataset sections
+            document.querySelectorAll('.dataset-section').forEach(section => {
+                section.classList.toggle('active', section.id === `section-${datasetId}`);
+            });
+        }
+
+        // Main function to generate the page
+        async function generateResultsPage() {
+            const container = document.getElementById('results-container');
+
+            // Create dataset sections
+            for (const dataset of datasets) {
+                const datasetSection = createDatasetSection(dataset);
+                container.appendChild(datasetSection);
+
+                // Load audio files for this dataset
+                await loadDatasetAudios(dataset.id, dataset.audioFiles);
+            }
+
+            // Add event listeners to navigation buttons
+            document.querySelectorAll('.dataset-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    switchDataset(button.dataset.dataset);
+                });
+            });
+        }
+
+        // Initialize the page when loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            generateResultsPage();
+            initLightbox();
+        });
+    </script>
+</body>
+</html>
