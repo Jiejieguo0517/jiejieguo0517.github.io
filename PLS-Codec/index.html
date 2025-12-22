@@ -1,0 +1,1780 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLS-Codec: Intelligibility-Fidelity Scalable Neural Speech Coding</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.4;
+            color: #333;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+            background-color: #f5f5f5;
+            font-size: 13px;
+        }
+
+        /* 第一部分：论文介绍 */
+        .paper-intro {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .authors {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-style: italic;
+            font-size: 14px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .abstract {
+            background: linear-gradient(to right, #f8f9fa, #f0f3f5);
+            padding: 18px 20px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+            font-size: 13.5px;
+            line-height: 1.5;
+            border-radius: 0 5px 5px 0;
+        }
+
+        .keywords {
+            color: #666;
+            font-size: 12.5px;
+            padding: 8px 0;
+            font-style: italic;
+        }
+
+        .architecture-figure {
+            text-align: center;
+            margin: 25px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .architecture-figure img {
+            max-width: 50%; /* 缩小到50% */
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .architecture-figure img:hover {
+            transform: scale(1.02);
+        }
+
+        /* 第二部分：实验部分 */
+        .experiment-section {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .comparison-description {
+            background: #f0f7ff;
+            padding: 18px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 13.5px;
+            line-height: 1.5;
+            border: 1px solid #d1e7ff;
+        }
+
+        .comparison-description a {
+            color: #2980b9;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .comparison-description a:hover {
+            text-decoration: underline;
+            color: #1a5276;
+        }
+
+        .dataset-navigation {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            width: 100%;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        .dataset-button {
+            flex: 1;
+            padding: 16px 0;
+            background: #f8f9fa;
+            color: #2c3e50;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+            text-align: center;
+            border-right: 1px solid #e0e0e0;
+            font-weight: 500;
+        }
+
+        .dataset-button:last-child {
+            border-right: none;
+        }
+
+        .dataset-button:hover {
+            background: #e9ecef;
+        }
+
+        .dataset-button.active {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+        }
+
+        .dataset-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .dataset-section.active {
+            display: block;
+        }
+
+        .dataset-title {
+            background: linear-gradient(to right, #2c3e50, #34495e);
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .audio-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .ground-truth {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .method-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .method-item {
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            min-height: 180px;
+            justify-content: space-between;
+            border: 1px solid #f0f0f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .method-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+        }
+
+        .method-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 6px;
+            text-align: center;
+            font-size: 11px;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            padding: 4px;
+        }
+
+        .method-title.ours {
+            background: #e8f4fd;
+            border-left: 3px solid #3498db;
+            padding: 6px;
+        }
+
+        audio {
+            width: 100%;
+            margin: 6px 0;
+            height: 30px;
+        }
+
+        .recognized-text {
+            font-size: 10px;
+            color: #555;
+            background: #f8f9fa;
+            padding: 6px;
+            border-radius: 4px;
+            margin-top: 6px;
+            flex-grow: 1;
+            min-height: 40px;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: auto;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+
+        .recognized-text:hover {
+            background: #e9ecef;
+        }
+
+        /* 新增WER样式 */
+        .wer-value {
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 4px;
+            border-radius: 2px;
+            text-align: center;
+            margin-top: 4px;
+            font-family: monospace;
+        }
+
+        .wer-zero {
+            color: #000;
+        }
+
+        .wer-non-zero {
+            color: #8B0000; /* 深红色 */
+        }
+
+        .mel-spectrogram {
+            width: 100%;
+            max-width: 250px;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .mel-spectrogram:hover {
+            transform: scale(1.03);
+        }
+
+        .original-text {
+            background: #e8f5e8;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: 11.5px;
+            text-align: center;
+            border: 1px solid #d4edda;
+        }
+
+        .group-title {
+            font-weight: bold;
+            margin: 15px 0 8px 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 6px;
+            font-size: 13px;
+            grid-column: 1 / -1;
+        }
+
+        .baselines-group {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        /* Lightbox 样式 */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        @media (max-width: 1200px) {
+            .method-group, .baselines-group {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .method-group, .baselines-group {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .audio-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .method-group, .baselines-group {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dataset-navigation {
+                flex-direction: column;
+            }
+
+            .dataset-button {
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+
+            .dataset-button:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 第一部分：论文介绍 -->
+    <div class="paper-intro">
+        <h1>Can Speech Coding Reach 100 bps? A Phoneme-Level Semantic Codec</h1>
+
+        <div class="authors">
+            Jiejie Guo, Student Member, IEEE, Wenjun Xu, Senior Member, IEEE, Fengyu Wang, Member, IEEE, Junxiao Liang, Student Member, IEEE, JiJie Liu, Jiaqi Wang, Student Member, IEEE, Ping Zhang Fellow, IEEE
+
+        </div>
+
+        <div class="abstract">
+            <strong>Abstract:</strong> Prevailing neural speech codecs rely on frame-level feature extraction and quantization, failing to effectively exploit the structural properties of speech—the discrete phonemic unit structure. This limitation leads to severe semantic intelligibility degradation at low bitrates. To address this, we propose the Phoneme-Level Semantic Codec (PLS-Codec), a neural speech coding framework that incorporates a phoneme-level dynamic compression mechanism. By integrating phoneme boundaries derived from the Montreal Forced Aligner (MFA) as structural priors, PLS-Codec dynamically aggregates frame-level features into phoneme-level representations, drastically reducing the token rate. As a result, PLS-Codec enables intelligible transmission at an ultra-low bitrate of 97 bps, which approaches the theoretical limit of speech coding.
+        </div>
+
+        <div class="keywords">
+            <strong>Keywords:</strong> Speech coding, ultra-low bitrate, vector quantization.
+        </div>
+
+        <div class="architecture-figure">
+            <h3>Figure 1: PLS-Codec Architecture</h3>
+            <img src="figs_10files/fig1_PLS_Codec.png" alt="PLS-Codec Architecture Diagram" class="zoomable">
+        </div>
+    </div>
+
+    <!-- 第二部分：实验部分 -->
+    <div class="experiment-section">
+        <h2 class="section-title">Experimental Results</h2>
+
+        <!-- Comparison Description -->
+        <div class="comparison-description">
+            <p>We compare our method with traditional low-bitrate codec MELPe at 0.6/1.2 kbps,
+                and neural codecs including EnCodec (<a href="https://github.com/facebookresearch/encodec" target="_blank">GitHub</a>) at 1.5 kbps,
+                the State-of-the-Art (SOTA) neural codec DAC (<a href="https://github.com/descriptinc/descript-audio-codec" target="_blank">GitHub</a>) at 0.5/1 kbps
+                WavTokenizer (<a href="https://github.com/jishengpeng/WavTokenizer" target="_blank">GitHub</a>) at 0.5/0.9 kbps,
+                and LLMCodec (<a href="https://github.com/yangdongchao/LLM-Codec" target="_blank">GitHub</a>) at 0.85 kbps.  All methods are evaluated using their official checkpoints.
+            </p><p>We select a subset of audio samples from each dataset, presenting the original audio alongside reconstructions from various methods.
+            Below each reconstructed audio, we display the recognized text obtained using the hubert-large-ls960-ft ASR model (<a href="https://huggingface.co/facebook/hubert-large-ls960-ft" target="_blank">HuggingFace</a>).</p>
+        </div>
+
+        <!-- Dataset Navigation -->
+        <div class="dataset-navigation">
+            <button class="dataset-button active" data-dataset="LibriSpeech-test-clean">LibriSpeech Test Clean</button>
+            <button class="dataset-button" data-dataset="LibriSpeech-test-other">LibriSpeech Test Other</button>
+        </div>
+    </div>
+
+    <!-- Results Sections -->
+    <div id="results-container">
+        <!-- Results will be loaded here by JavaScript -->
+    <div class="dataset-section active" id="section-LibriSpeech-test-clean">
+                <div class="dataset-title">LibriSpeech Test Clean</div>
+                <div id="LibriSpeech-test-clean-content"><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-clean/1580-141084-0022/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-clean/raw_audios_16k/1580-141084-0022.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-clean-1580-141084-0022">and one more this morning</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/1580-141084-0022-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-melpe-0.6">and won wore thismorning</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-melpe-0.6">WER: 0.8000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/1580-141084-0022-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-melpe-1.2">and one more this morning</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-melpe-1.2">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/Encodec/wavs_recon/1580-141084-0022-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-encodec-1.5">and one more this morning</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-encodec-1.5">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/LLM-Codec/wavs_recon/1580-141084-0022-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-llmcodec-0.85">and one more this morning</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-llmcodec-0.85">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/1580-141084-0022-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-wavtokenizer-0.5">and when ri this morning</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-wavtokenizer-0.5">WER: 0.4000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/1580-141084-0022-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-wavtokenizer-0.9">and one hore this morning</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-wavtokenizer-0.9">WER: 0.2000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/1580-141084-0022-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-dac-0.5">is the wodo worth is mornin</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-dac-0.5">WER: 1.2000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/1580-141084-0022-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-dac-1">and the one more this morning</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-dac-1">WER: 0.2000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.10 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/PLS-Codec/wavs_recon/1580-141084-0022-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141084-0022-plscodec-0.097">and one more this morning</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141084-0022-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-clean/1580-141083-0013/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-clean/raw_audios_16k/1580-141083-0013.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-clean-1580-141083-0013">above all things i desire to settle the matter quietly and discreetly</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/1580-141083-0013-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-melpe-0.6">above all things i desire to settle the matter cliretly and discreetly</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-melpe-0.6">WER: 0.0833</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/1580-141083-0013-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-melpe-1.2">above all things i desire to settle the matter quietly and discreetly</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-melpe-1.2">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/Encodec/wavs_recon/1580-141083-0013-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-encodec-1.5">above all things i desire to settle the matter quietly and discreetly</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-encodec-1.5">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/LLM-Codec/wavs_recon/1580-141083-0013-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-llmcodec-0.85">above all things i desire to settle the matter quietly and discreetly</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-llmcodec-0.85">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/1580-141083-0013-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-wavtokenizer-0.5">babove all things i desired to settle the matter quietly and discreetly</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-wavtokenizer-0.5">WER: 0.1667</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/1580-141083-0013-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-wavtokenizer-0.9">above all things i desire to settle the matter quietly and discreetly</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-wavtokenizer-0.9">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/1580-141083-0013-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-dac-0.5">unt os thinks tey desire to settle te matter quietly in this stream</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-dac-0.5">WER: 0.6667</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/1580-141083-0013-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-dac-1">above all things i desire to settle the matter quietly and discreetly</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-dac-1">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.10 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/PLS-Codec/wavs_recon/1580-141083-0013-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-1580-141083-0013-plscodec-0.097">above all things i desire to settle the matter quietly and discreetly</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-1580-141083-0013-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-clean/61-70968-0008/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-clean/raw_audios_16k/61-70968-0008.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-clean-61-70968-0008">take your place and let us see what the crystal can show to you</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/61-70968-0008-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-melpe-0.6">take your place and let us see what the crispal can show to you</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-melpe-0.6">WER: 0.0714</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/61-70968-0008-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-melpe-1.2">take your place and let us see what the crispal can show to you</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-melpe-1.2">WER: 0.0714</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/Encodec/wavs_recon/61-70968-0008-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-encodec-1.5">take your place and let us see what the crystal can show to you</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-encodec-1.5">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/LLM-Codec/wavs_recon/61-70968-0008-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-llmcodec-0.85">take your place and let us see what the crisbol can show to you</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-llmcodec-0.85">WER: 0.0714</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/61-70968-0008-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-wavtokenizer-0.5">kake your place and let us see what the crispbook can show to you</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-wavtokenizer-0.5">WER: 0.1429</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/61-70968-0008-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-wavtokenizer-0.9">take your place and let us see what the crystal can show to you</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-wavtokenizer-0.9">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/61-70968-0008-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-dac-0.5">and no prac under es not the crediple ti show to you</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-dac-0.5">WER: 0.7143</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/61-70968-0008-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-dac-1">take your place and let us see whatl the cristpel can show to you</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-dac-1">WER: 0.1429</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.10 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/PLS-Codec/wavs_recon/61-70968-0008-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-61-70968-0008-plscodec-0.097">take your place and let us see what the crystal can show to you</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-61-70968-0008-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-clean/6829-68771-0022/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-clean/raw_audios_16k/6829-68771-0022.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-clean-6829-68771-0022">i attend to the household mending you know and care for the linen</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/6829-68771-0022-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-melpe-0.6">i tent to the household mending you know and care for the linen</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-melpe-0.6">WER: 0.0769</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/6829-68771-0022-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-melpe-1.2">i attend to the household bending you know and care for the linen</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-melpe-1.2">WER: 0.0769</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/Encodec/wavs_recon/6829-68771-0022-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-encodec-1.5">i attend to the household nunding you know and care for the linen</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-encodec-1.5">WER: 0.0769</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/LLM-Codec/wavs_recon/6829-68771-0022-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-llmcodec-0.85">i attend to the honsold bending you know and teare for the linen</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-llmcodec-0.85">WER: 0.2308</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/6829-68771-0022-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-wavtokenizer-0.5">i attend to the household bending you know and care for the linen</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-wavtokenizer-0.5">WER: 0.0769</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/6829-68771-0022-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-wavtokenizer-0.9">i attend to the household bending you know and care for the limen</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-wavtokenizer-0.9">WER: 0.1538</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/6829-68771-0022-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-dac-0.5">e jibs a i us olt feter mi dam and dar for the linen</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-dac-0.5">WER: 0.7692</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/6829-68771-0022-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-dac-1">i a te antina household tinking you know ampdyr fit of lindon</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-dac-1">WER: 0.6923</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.10 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/PLS-Codec/wavs_recon/6829-68771-0022-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-6829-68771-0022-plscodec-0.097">i attend to the household mending you know and care for the linen</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-6829-68771-0022-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-clean/4446-2273-0002/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-clean/raw_audios_16k/4446-2273-0002.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-clean-4446-2273-0002">lamb wouldnt care a great deal about many of them i fancy</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/4446-2273-0002-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-melpe-0.6">iam would care a great deal about many of them i fancy</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-melpe-0.6">WER: 0.1667</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/MELPe/wavs_recon/4446-2273-0002-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-melpe-1.2">lamb wouldnt care a great deal about many of tem i fancy</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-melpe-1.2">WER: 0.0833</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/Encodec/wavs_recon/4446-2273-0002-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-encodec-1.5">lam wouldnt care a great deal about many of them i fancy</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-encodec-1.5">WER: 0.0833</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/LLM-Codec/wavs_recon/4446-2273-0002-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-llmcodec-0.85">lamb wouldnt care a great deal about many of em i fancy</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-llmcodec-0.85">WER: 0.0833</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/4446-2273-0002-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-wavtokenizer-0.5">leve wouldt care a great deal about many of em i fancy</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-wavtokenizer-0.5">WER: 0.2500</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/WavTokenizer/wavs_recon/4446-2273-0002-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-wavtokenizer-0.9">lamb wouldnt care a great deal about many of them i fancy</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-wavtokenizer-0.9">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/4446-2273-0002-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-dac-0.5">why i wouldnt tare a grat you about etting about my fancy</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-dac-0.5">WER: 0.7500</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/DAC/wavs_recon/4446-2273-0002-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-dac-1">lan wouldnt care a great deal about many of her i fancy</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-dac-1">WER: 0.1667</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.10 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-clean/PLS-Codec/wavs_recon/4446-2273-0002-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-clean-4446-2273-0002-plscodec-0.097">lamb wouldnt care a great deal about many of them i fancy</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-clean-4446-2273-0002-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div></div>
+            </div><div class="dataset-section" id="section-LibriSpeech-test-other">
+                <div class="dataset-title">LibriSpeech Test Other</div>
+                <div id="LibriSpeech-test-other-content"><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-other/6432-63722-0052/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-other/raw_audios_16k/6432-63722-0052.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-other-6432-63722-0052">if youll excuse me ill pretend im fishing and i may catch something</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/6432-63722-0052-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-melpe-0.6">if youll excuse me ill pretend that im fishing and i lad kis sophi</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-melpe-0.6">WER: 0.3077</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/6432-63722-0052-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-melpe-1.2">if youll excuse me ill pretend im fishing but i may kis something</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-melpe-1.2">WER: 0.1538</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/Encodec/wavs_recon/6432-63722-0052-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-encodec-1.5">if youll excuse me ill pretend im fishing and i may catch something</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-encodec-1.5">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/LLM-Codec/wavs_recon/6432-63722-0052-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-llmcodec-0.85">if youll excuse me ill pretend im fishing and i may catch something</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-llmcodec-0.85">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/6432-63722-0052-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-wavtokenizer-0.5">if youll excuse me ill pretend im fishing and i made katth something</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-wavtokenizer-0.5">WER: 0.1538</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/6432-63722-0052-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-wavtokenizer-0.9">if youll excuse me ill pretend im fishing and i may catch something</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-wavtokenizer-0.9">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/6432-63722-0052-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-dac-0.5">if yol extese me wic yan a pisin an in mae kids like em</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-dac-0.5">WER: 0.9231</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/6432-63722-0052-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-dac-1">if youll excuse me ill pretend im fishing and it may tip something</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-dac-1">WER: 0.1538</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.08 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/PLS-Codec/wavs_recon/6432-63722-0052-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-6432-63722-0052-plscodec-0.097">if youll excuse me ill pretend im fishing and i may catch something</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-6432-63722-0052-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-other/3528-168669-0091/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-other/raw_audios_16k/3528-168669-0091.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-other-3528-168669-0091">they persecute the saints</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/3528-168669-0091-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-melpe-0.6">i personise e sante</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-melpe-0.6">WER: 1.0000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/3528-168669-0091-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-melpe-1.2">they persecute the saints</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-melpe-1.2">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/Encodec/wavs_recon/3528-168669-0091-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-encodec-1.5">they persecute the saints</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-encodec-1.5">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/LLM-Codec/wavs_recon/3528-168669-0091-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-llmcodec-0.85">they persecute the saints</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-llmcodec-0.85">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/3528-168669-0091-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-wavtokenizer-0.5">they persecute the saints</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-wavtokenizer-0.5">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/3528-168669-0091-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-wavtokenizer-0.9">they persecute the saints</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-wavtokenizer-0.9">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/3528-168669-0091-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-dac-0.5">let us t he te thing</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-dac-0.5">WER: 1.5000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/3528-168669-0091-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-dac-1">they prosecute the saints</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-dac-1">WER: 0.2500</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.08 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/PLS-Codec/wavs_recon/3528-168669-0091-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-3528-168669-0091-plscodec-0.097">they persecute the saints</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-3528-168669-0091-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-other/8131-117017-0004/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-other/raw_audios_16k/8131-117017-0004.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-other-8131-117017-0004">guns suddenly seemed to be flourishing everywhere</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/8131-117017-0004-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-melpe-0.6">guns suddenly seemed to be flourishing everywhere</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-melpe-0.6">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/8131-117017-0004-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-melpe-1.2">guns suddenly seemed to be flourishing everywhere</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-melpe-1.2">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/Encodec/wavs_recon/8131-117017-0004-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-encodec-1.5">them suddenly seemed to be flourishing everywhere</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-encodec-1.5">WER: 0.1429</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/LLM-Codec/wavs_recon/8131-117017-0004-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-llmcodec-0.85">gems suddenly seemed to be flourishing everywhere</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-llmcodec-0.85">WER: 0.1429</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/8131-117017-0004-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-wavtokenizer-0.5">druns suddenly seemed to be flourishing everywhere</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-wavtokenizer-0.5">WER: 0.1429</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/8131-117017-0004-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-wavtokenizer-0.9">guns suddenly seemed to be flourishing everywhere</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-wavtokenizer-0.9">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/8131-117017-0004-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-dac-0.5">thom suddenly seen her to be florishin even i</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-dac-0.5">WER: 0.8571</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/8131-117017-0004-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-dac-1">guns suddenly seemed to be flourishing everywhere</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-dac-1">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.08 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/PLS-Codec/wavs_recon/8131-117017-0004-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117017-0004-plscodec-0.097">guns suddenly seemed to be flourishing everywhere</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117017-0004-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-other/8131-117016-0017/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-other/raw_audios_16k/8131-117016-0017.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-other-8131-117016-0017">for a second gordon cursed himself</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/8131-117016-0017-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-melpe-0.6">for a second gorden cursed himself</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-melpe-0.6">WER: 0.1667</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/8131-117016-0017-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-melpe-1.2">for a second gordon cursed himself</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-melpe-1.2">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/Encodec/wavs_recon/8131-117016-0017-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-encodec-1.5">for a second gordon cursed himself</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-encodec-1.5">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/LLM-Codec/wavs_recon/8131-117016-0017-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-llmcodec-0.85">for a second gordon cursed himself</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-llmcodec-0.85">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/8131-117016-0017-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-wavtokenizer-0.5">for a second bordn cursed himself</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-wavtokenizer-0.5">WER: 0.1667</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/8131-117016-0017-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-wavtokenizer-0.9">for a second gordon cursed himself</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-wavtokenizer-0.9">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/8131-117016-0017-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-dac-0.5">third second the an croached himself</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-dac-0.5">WER: 0.8333</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/8131-117016-0017-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-dac-1">for a second gordon cursed himself</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-dac-1">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.08 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/PLS-Codec/wavs_recon/8131-117016-0017-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0017-plscodec-0.097">for a second gordon cursed himself</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117016-0017-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div><div class="audio-grid">
+                    <div class="ground-truth">
+                        <h3>Ground Truth</h3>
+                        <img src="figs_10files/LibriSpeech-test-other/8131-117016-0050/a_original_mel_with_f0_energy_phonemes.png" alt="Mel Spectrogram" class="mel-spectrogram zoomable">
+                        <audio controls="" preload="none">
+                            <source src="audios_10files/LibriSpeech-test-other/raw_audios_16k/8131-117016-0050.wav" type="audio/wav">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="original-text">
+                            <strong>Original text:</strong>
+                            <span id="original-text-LibriSpeech-test-other-8131-117016-0050">ever see a martian election</span>
+                        </div>
+                    </div>
+                    <div class="methods-container">
+                        <div class="group-title">Baselines</div><div class="baselines-group">
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @600 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/8131-117016-0050-0.6kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-melpe-0.6">e resee a march in elecson</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-melpe-0.6">WER: 1.0000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    MELPe @1.2 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/MELPe/wavs_recon/8131-117016-0050-1.2kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-melpe-1.2">ee se a martian election</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-melpe-1.2">WER: 0.4000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    Encodec @1.5 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/Encodec/wavs_recon/8131-117016-0050-1.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-encodec-1.5">ever see a martian election</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-encodec-1.5">WER: 0.0</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    LLM-Codec @850 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/LLM-Codec/wavs_recon/8131-117016-0050-0.85kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-llmcodec-0.85">ever see a marsian election</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-llmcodec-0.85">WER: 0.2000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/8131-117016-0050-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-wavtokenizer-0.5">theeer see a martian election</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-wavtokenizer-0.5">WER: 0.2000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    WavTokenizer @900 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/WavTokenizer/wavs_recon/8131-117016-0050-0.9kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-wavtokenizer-0.9">eresea martian election</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-wavtokenizer-0.9">WER: 0.6000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @500 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/8131-117016-0050-0.5kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-dac-0.5">never see a worsiper likesim</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-dac-0.5">WER: 0.6000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    DAC @1 kbps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/DAC/wavs_recon/8131-117016-0050-1.0kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-dac-1">eversee a martian election</div>
+                                <div class="wer-value wer-non-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-dac-1">WER: 0.4000</div>
+                            </div>
+
+                            <div class="method-item">
+                                <div class="method-title">
+                                    PLS-Codec @97.08 bps
+                                </div>
+                                <audio controls="" preload="none">
+                                    <source src="audios_10files/LibriSpeech-test-other/PLS-Codec/wavs_recon/8131-117016-0050-0.1kbps.wav" type="audio/wav">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="recognized-text" id="text-LibriSpeech-test-other-8131-117016-0050-plscodec-0.097">ever see a martian election</div>
+                                <div class="wer-value wer-zero" id="wer-LibriSpeech-test-other-8131-117016-0050-plscodec-0.097">WER: 0.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div></div>
+            </div></div>
+
+       <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" id="lightbox-close">×</span>
+        <img id="lightbox-img" src="" alt="Zoomed Image">
+    </div>
+
+<script>
+    // 数据集切换功能
+    function switchDataset(datasetId) {
+        // 更新导航按钮
+        document.querySelectorAll('.dataset-button').forEach(button => {
+            button.classList.toggle('active', button.dataset.dataset === datasetId);
+        });
+
+        // 更新数据集部分
+        document.querySelectorAll('.dataset-section').forEach(section => {
+            section.classList.toggle('active', section.id === `section-${datasetId}`);
+        });
+    }
+
+    // 初始化函数
+    function initPage() {
+        // 绑定数据集导航
+        const navContainer = document.querySelector('.dataset-navigation');
+        if (navContainer) {
+            navContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('dataset-button')) {
+                    switchDataset(e.target.dataset.dataset);
+                }
+            });
+        }
+
+        // 绑定lightbox功能
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxClose = document.getElementById('lightbox-close');
+
+        if (lightbox && lightboxImg && lightboxClose) {
+            // 点击图片打开lightbox
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('zoomable')) {
+                    lightboxImg.src = e.target.src;
+                    lightbox.classList.add('active');
+                }
+            });
+
+            // 关闭lightbox
+            lightboxClose.addEventListener('click', function() {
+                lightbox.classList.remove('active');
+            });
+
+            lightbox.addEventListener('click', function(e) {
+                if (e.target !== lightboxImg) {
+                    lightbox.classList.remove('active');
+                }
+            });
+        }
+    }
+
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', initPage);
+</script>
+</body>
+</html>
